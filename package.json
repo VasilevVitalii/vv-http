@@ -1,0 +1,22 @@
+{
+  "name": "vv-http",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VasilevVitalii/vv-http.git"
+  },
+  "author": "Vitalii Vasilev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/VasilevVitalii/vv-http/issues"
+  },
+  "homepage": "https://github.com/VasilevVitalii/vv-http#readme",
+  "dependencies": {
+    "vv-shared": "^2.0.23"
+  }
+}

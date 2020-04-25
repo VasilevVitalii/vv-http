@@ -17,6 +17,6 @@ jobs:
         if: failure()
         with:
           name: logs
-          path: /home/user/.npm/_logs
+          path: /home/user
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}

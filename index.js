@@ -35,6 +35,12 @@ function get_data(path, type, options, callback) {
     }
 
     requester.get(path, result => {
+        let statusCode = vvs.toInt(vvs.findPropertyValueInObject(result, 'statusCode'), 200)
+        if (statusCode !== 200) {
+            callback(new Error(vvs.format('request return statusCode {0}', statusCode)), undefined)
+            return
+        }
+
         let allow_file = !vvs.isEmptyString(save_as_full_file_name)
 
         let write_stream = undefined

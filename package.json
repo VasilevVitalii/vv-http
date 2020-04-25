@@ -16,6 +16,10 @@
     "url": "https://github.com/VasilevVitalii/vv-http/issues"
   },
   "homepage": "https://github.com/VasilevVitalii/vv-http#readme",
+  "devDependencies": {
+    "jsdoc-to-markdown": "^5.0.3",
+    "pre-commit": "^1.2.2"
+  },
   "dependencies": {
     "vv-shared": "^2.0.23"
   }

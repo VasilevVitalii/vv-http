@@ -13,10 +13,5 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm i
       - run: npm publish
-      - uses: actions/upload-artifact@v1
-        if: failure()
-        with:
-          name: logs
-          path: /home/user
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}

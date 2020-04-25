@@ -12,14 +12,11 @@ jobs:
           node-version: 13
           registry-url: https://registry.npmjs.org/
       - run: npm i
-      - run: mkdir -p res
-      - run: chmod 0777 ./res
-      - run: ls > res/tree.txt
       - run: npm publish
       - uses: actions/upload-artifact@v1
         if: failure()
         with:
-          name: cache
-          path: res
+          name: logs
+          path: /home/user/.npm/_logs
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}

@@ -1,11 +1,13 @@
 {
   "name": "vv-http",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "updatever": "npm version patch --no-git-tag-version",
+    "gitadd": "git add ./package.json ./package-lock.json"
   },
+  "pre-commit": "updatever, gitadd",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/VasilevVitalii/vv-http.git"

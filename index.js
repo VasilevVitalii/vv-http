@@ -78,7 +78,6 @@ function get_data(path, type, options, callback) {
                 if (!vvs.isEmpty(write_stream)) {
                     write_stream.close()
                 }
-                callback(undefined, undefined)
             } else {
                 callback(undefined, Buffer.concat(body))
             }

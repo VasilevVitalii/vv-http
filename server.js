@@ -2,9 +2,11 @@
 const vvs = require('vv-shared')
 const http = require('http')
 const https = require('https')
-const fs = require('fs')
+const static = require('./static.js')
 
-exports.go = go
+/**
+ * @typedef {static.type_url_beautify} type_url_beautify
+ */
 
 /**
  * @typedef type_request
@@ -16,6 +18,11 @@ exports.go = go
  */
 
 /**
+ * @typedef type_options
+ * @property {type_url_beautify} url
+ */
+
+/**
  * @callback callback_error
  * @param {Error} error
  */
@@ -23,29 +30,64 @@ exports.go = go
  * @callback callback_request
  * @param {type_request} request
  */
+
+/** @type {callback_request} */
+let callback_on_request = undefined
+/** @type {callback_error} */
+let callback_on_error = undefined
+
+exports.start = start
+exports.on_request = on_request
+exports.on_error = on_error
+
 /**
- * @param {string} ip
- * @param {number} port
- * @param {callback_error} [callback_start]
- * @param {callback_request} callback_request
- * @param {callback_error} [callback_error]
+ * @param {type_options} options
+ * @param {callback_error} [callback]
  */
+function start(options, callback) {
 
-function go(ip, port, callback_start, callback_request, callback_error) {
+    /** @type {type_options} */
+    let opt = (vvs.isEmpty(options) ? {} : options)
+    /** @type {type_url_beautify} */
+    let opt_url = (vvs.isEmpty(opt) ? {} : opt.url)
 
-    let server = http.createServer()
+    if (vvs.isEmptyString(opt_url.url)) {
+        if (vvs.isFunction(callback)) {
+            callback(new Error ('url is empty'))
+        }
+        return
+    }
+    if (vvs.isEmpty(opt_url.port)) {
+        if (vvs.isFunction(callback)) {
+            callback(new Error ('port is empty'))
+        }
+        return
+    }
+
+    /** @type {Object}  */
+    let server = undefined
+    if (opt_url.type === 'http') {
+        server = http.createServer()
+    } else if (opt_url.type === 'https') {
+        server = https.createServer()
+    } else {
+        if (vvs.isFunction(callback)) {
+            callback(new Error ('server type is empty or unknown'))
+        }
+        return
+    }
 
     let sended_callback_start = false
 
     server.on('error', error => {
         if (sended_callback_start !== true) {
             sended_callback_start = true
-            if (vvs.isFunction(callback_start)) {
-                callback_start(error)
+            if (vvs.isFunction(callback)) {
+                callback(error)
             }
         } else {
-            if (vvs.isFunction(callback_error)) {
-                callback_error(error)
+            if (vvs.isFunction(callback_on_error)) {
+                callback_on_error(error)
             }
         }
     })
@@ -53,8 +95,8 @@ function go(ip, port, callback_start, callback_request, callback_error) {
     server.on('listening', () => {
         if (sended_callback_start !== true) {
             sended_callback_start = true
-            if (vvs.isFunction(callback_start)) {
-                callback_start(undefined)
+            if (vvs.isFunction(callback)) {
+                callback(undefined)
             }
         }
     })
@@ -69,18 +111,30 @@ function go(ip, port, callback_start, callback_request, callback_error) {
         serverResponseHttp.setHeader('Access-Control-Allow-Credentials', true)
 
         let data = ''
-        incomingMessageHttp.on('data', function (part_data) {
+        incomingMessageHttp.on('data', part_data => {
             data += part_data
         })
 
-        incomingMessageHttp.on('end', function () {
+        incomingMessageHttp.on('end', () => {
             incomingMessageHttp.removeAllListeners('data')
             incomingMessageHttp.removeAllListeners('end')
 
+            let incoming_method = vvs.toString(incomingMessageHttp.method, '')
+            let incoming_url = vvs.toString(incomingMessageHttp.url, '/')
+
+            if (!vvs.isEmptyString(opt_url.path)) {
+                let checked_incoming_url = (incoming_url.length > opt_url.path.length ? incoming_url.substring(0, opt_url.path.length) : incoming_url)
+                if (!vvs.equal(opt_url.path, checked_incoming_url)) {
+                    serverResponseHttp.statusCode = 404
+                    serverResponseHttp.end()
+                    return
+                }
+            }
+
             /** @type {type_request} */
             let request = {
-                method: incomingMessageHttp.method,
-                url: incomingMessageHttp.url,
+                method: incoming_method,
+                url: incoming_url,
                 data: data,
                 headers:  incomingMessageHttp.headers,
                 reply: function(statusCode, data, callback_send) {
@@ -100,15 +154,29 @@ function go(ip, port, callback_start, callback_request, callback_error) {
                 }
             }
 
-            if (vvs.isFunction(callback_request)) {
-                callback_request(request)
+            if (vvs.isFunction(callback_on_request)) {
+                callback_on_request(request)
             }
         })
     })
 
     try {
-        server.listen(port, ip)
+        server.listen(opt_url.port, opt_url.url)
     } catch (error) {
         let a = 5
     }
+}
+
+/**
+ * @param {callback_request} callback
+ */
+function on_request(callback) {
+    callback_on_request = callback
+}
+
+/**
+ * @param {callback_error} callback
+ */
+function on_error(callback) {
+    callback_on_error = callback
 }

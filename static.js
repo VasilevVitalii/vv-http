@@ -5,6 +5,7 @@ const https = require('https')
 const fs = require('fs')
 
 exports.get_data = get_data
+exports.url_beautify = url_beautify
 
 /**
  * @typedef type_get_data
@@ -85,4 +86,68 @@ function get_data(path, type, options, callback) {
             callback(error, undefined)
         })
     })
+}
+
+/**
+ * @typedef type_url_beautify
+ * @property {'http'|'https'} type
+ * @property {string} url
+ * @property {number} port
+ * @property {string} [path]
+ */
+
+/**
+ * @param {string} url
+ * @returns {type_url_beautify}
+ */
+function url_beautify(url) {
+    if (vvs.isEmptyString(url)) return undefined
+    url = url.trim()
+
+    /** @type {type_url_beautify} */
+    let res = {
+        type: undefined,
+        url: undefined,
+        port: undefined,
+        path: undefined
+    }
+
+    if (vvs.equal(url.substring(0, 8), 'https://')) {
+        res.type = 'https'
+        url = url.substring(8, url.length).trim()
+    } else if (vvs.equal(url.substring(0, 7), 'http://')) {
+        res.type = 'http'
+        url = url.substring(7, url.length).trim()
+    } else {
+        res.type = 'http'
+    }
+    if (vvs.isEmptyString(url)) return res
+
+    let find_port = url.indexOf(':')
+    if (find_port >= 0) {
+        res.url = url.substring(0, find_port).trim()
+        url = url.substring(find_port + 1, url.length).trim()
+
+        let find_path = url.indexOf('/')
+        if (find_path > 0) {
+            res.port = vvs.toInt(url.substring(0, find_path).trim())
+            res.path = url.substring(find_path, url.length).trim()
+        } else {
+            res.port = vvs.toInt(url.trim())
+            res.path = '/'
+            url = ''
+        }
+    } else {
+        let find_url = url.indexOf('/')
+        if (find_url > 0) {
+            res.url = url.substring(0, find_url).trim()
+            res.path = url.substring(find_url, url.length).trim()
+        } else {
+            res.url = url.trim()
+            res.path = '/'
+            url = ''
+        }
+    }
+
+    return res
 }

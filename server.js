@@ -2,6 +2,7 @@
 const vvs = require('vv-shared')
 const http = require('http')
 const https = require('https')
+const ssl = require('./self_signed_ssl.js')
 const static = require('./static.js')
 
 /**
@@ -18,8 +19,15 @@ const static = require('./static.js')
  */
 
 /**
+ * @typedef type_ssl
+ * @property {Buffer} key
+ * @property {Buffer} cert
+ */
+
+/**
  * @typedef type_options
  * @property {type_url_beautify} url
+ * @property {type_ssl} [ssl]
  */
 
 /**
@@ -50,6 +58,8 @@ function start(options, callback) {
     let opt = (vvs.isEmpty(options) ? {} : options)
     /** @type {type_url_beautify} */
     let opt_url = (vvs.isEmpty(opt) ? {} : opt.url)
+    /** @type {type_ssl} */
+    let opt_ssl = (vvs.isEmpty(opt) ? {} : opt.ssl)
 
     if (vvs.isEmptyString(opt_url.url)) {
         if (vvs.isFunction(callback)) {
@@ -69,7 +79,10 @@ function start(options, callback) {
     if (opt_url.type === 'http') {
         server = http.createServer()
     } else if (opt_url.type === 'https') {
-        server = https.createServer()
+        server = https.createServer({
+            key: (vvs.isEmpty(opt_ssl) ? ssl.key : opt_ssl.key),
+            cert: (vvs.isEmpty(opt_ssl) ? ssl.cert : opt_ssl.cert)
+        })
     } else {
         if (vvs.isFunction(callback)) {
             callback(new Error ('server type is empty or unknown'))
@@ -77,11 +90,11 @@ function start(options, callback) {
         return
     }
 
-    let sended_callback_start = false
+    let o = {sended_callback_start: false}
 
     server.on('error', error => {
-        if (sended_callback_start !== true) {
-            sended_callback_start = true
+        if (o.sended_callback_start !== true) {
+            o.sended_callback_start = true
             if (vvs.isFunction(callback)) {
                 callback(error)
             }
@@ -93,8 +106,8 @@ function start(options, callback) {
     })
 
     server.on('listening', () => {
-        if (sended_callback_start !== true) {
-            sended_callback_start = true
+        if (o.sended_callback_start !== true) {
+            o.sended_callback_start = true
             if (vvs.isFunction(callback)) {
                 callback(undefined)
             }
@@ -163,7 +176,12 @@ function start(options, callback) {
     try {
         server.listen(opt_url.port, opt_url.url)
     } catch (error) {
-        let a = 5
+        if (o.sended_callback_start !== true) {
+            o.sended_callback_start = true
+            if (vvs.isFunction(callback)) {
+                callback(undefined)
+            }
+        }
     }
 }
 

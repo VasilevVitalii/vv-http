@@ -8,14 +8,17 @@ const static = require('./static.js')
 /**
  * @typedef {static.type_url_beautify} type_url_beautify
  */
+/**
+ * @typedef {'GET'|'HEAD'|'POST'|'PUT'|'DELETE'|'CONNECT'|'OPTIONS'|'TRACE'} type_request_method
+ */
 
 /**
  * @typedef type_request
- * @property {string} method
+ * @property {type_request_method} method
  * @property {string} url
  * @property {string} data
  * @property {Object} headers
- * @property {function} reply
+ * @property {function_reply} reply
  */
 
 /**
@@ -37,6 +40,12 @@ const static = require('./static.js')
 /**
  * @callback callback_request
  * @param {type_request} request
+ */
+/**
+ * @callback function_reply
+ * @param {number} status_code
+ * @param {string} data
+ * @param {callback_error} [callback]
  */
 
 /** @type {callback_request} */
@@ -132,7 +141,9 @@ function start(options, callback) {
             incomingMessageHttp.removeAllListeners('data')
             incomingMessageHttp.removeAllListeners('end')
 
-            let incoming_method = vvs.toString(incomingMessageHttp.method, '')
+            /** @type {type_request_method} */
+            // @ts-ignore
+            let incoming_method = vvs.toString(incomingMessageHttp.method, '').toUpperCase()
             let incoming_url = vvs.toString(incomingMessageHttp.url, '/')
 
             if (!vvs.isEmptyString(opt_url.path)) {
@@ -150,18 +161,18 @@ function start(options, callback) {
                 url: incoming_url,
                 data: data,
                 headers:  incomingMessageHttp.headers,
-                reply: function(statusCode, data, callback_send) {
+                reply: function(status_code, data, callback) {
                     try {
-                        serverResponseHttp.statusCode = vvs.toInt(statusCode, 200)
+                        serverResponseHttp.statusCode = vvs.toInt(status_code, 200)
                         serverResponseHttp.end(data, () => {
                             incomingMessageHttp = undefined
-                            if (vvs.isFunction(callback_send)) {
-                                callback_send(undefined)
+                            if (vvs.isFunction(callback)) {
+                                callback(undefined)
                             }
                         })
                     } catch (error) {
-                        if (vvs.isFunction(callback_send)) {
-                            callback_send(error)
+                        if (vvs.isFunction(callback)) {
+                            callback(error)
                         }
                     }
                 }

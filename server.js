@@ -11,7 +11,6 @@ const static = require('./static.js')
 /**
  * @typedef {'GET'|'HEAD'|'POST'|'PUT'|'DELETE'|'CONNECT'|'OPTIONS'|'TRACE'} type_request_method
  */
-
 /**
  * @typedef type_request
  * @property {type_request_method} method
@@ -19,20 +18,18 @@ const static = require('./static.js')
  * @property {string} data
  * @property {Object} headers
  * @property {function_reply} reply
+ * @property {function} reply_set_header
  */
-
 /**
  * @typedef type_ssl
  * @property {Buffer} key
  * @property {Buffer} cert
  */
-
 /**
  * @typedef type_options
  * @property {type_url_beautify} url
  * @property {type_ssl} [ssl]
  */
-
 /**
  * @callback callback_error
  * @param {Error} error
@@ -46,6 +43,11 @@ const static = require('./static.js')
  * @param {number} status_code
  * @param {string} data
  * @param {callback_error} [callback]
+ */
+/**
+ * @callback function_reply_set_header
+ * @param {string} key
+ * @param {string|boolean|number} value
  */
 
 /** @type {callback_request} */
@@ -175,6 +177,9 @@ function start(options, callback) {
                             callback(error)
                         }
                     }
+                },
+                reply_set_header: function(key, value) {
+                    serverResponseHttp.setHeader(key, value)
                 }
             }
 

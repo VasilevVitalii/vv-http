@@ -1,7 +1,14 @@
 // @ts-check
-const shared = require('./static.js')
-const server = require('./server.js')
+const app = require('./app.js')
+const type = require('./@type.js')
+const get = require('./get.js')
 
-exports.get_data = shared.get_data
-exports.url_beautify = shared.url_beautify
-exports.server = server
+exports.create = create
+exports.get = get.get
+
+/**
+ * @param {type.constructor_options} [options]
+ */
+function create(options) {
+    return new app(options)
+}

@@ -37,12 +37,30 @@ server.start(error => {
         }
     })
 })
-```<a name="create"></a>
+```## Functions
+
+<dl>
+<dt><a href="#create">create([options])</a></dt>
+<dd></dd>
+</dl>
+
+## Typedefs
+
+<dl>
+<dt><a href="#http_constructor_options">http_constructor_options</a> : <code>type.constructor_options</code></dt>
+<dd></dd>
+</dl>
+
+<a name="create"></a>
 
 ## create([options])
 **Kind**: global function  
 
 | Param | Type |
 | --- | --- |
-| [options] | <code>type.constructor\_options</code> | 
+| [options] | [<code>http\_constructor\_options</code>](#http_constructor_options) | 
 
+<a name="http_constructor_options"></a>
+
+## http\_constructor\_options : <code>type.constructor\_options</code>
+**Kind**: global typedef  

@@ -7,7 +7,11 @@ exports.create = create
 exports.get = get.get
 
 /**
- * @param {type.constructor_options} [options]
+ * @typedef {type.constructor_options} http_constructor_options
+ */
+
+/**
+ * @param {http_constructor_options} [options]
  */
 function create(options) {
     return new app(options)

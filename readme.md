@@ -47,6 +47,8 @@ server.start(error => {
 ## Typedefs
 
 <dl>
+<dt><a href="#app">app</a> : <code>lib_app</code></dt>
+<dd></dd>
 <dt><a href="#http_constructor_options">http_constructor_options</a> : <code>type.constructor_options</code></dt>
 <dd></dd>
 </dl>
@@ -60,6 +62,10 @@ server.start(error => {
 | --- | --- |
 | [options] | [<code>http\_constructor\_options</code>](#http_constructor_options) | 
 
+<a name="app"></a>
+
+## app : <code>lib\_app</code>
+**Kind**: global typedef  
 <a name="http_constructor_options"></a>
 
 ## http\_constructor\_options : <code>type.constructor\_options</code>

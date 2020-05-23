@@ -10,11 +10,11 @@ exports.get = get.get
  * @typedef {lib_app} app
  */
 /**
- * @typedef {type.constructor_options} http_constructor_options
+ * @typedef {type.constructor_options} options
  */
 
 /**
- * @param {http_constructor_options} [options]
+ * @param {options} [options]
  */
 function create(options) {
     return new lib_app(options)

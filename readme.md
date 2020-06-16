@@ -49,7 +49,7 @@ server.start(error => {
 <dl>
 <dt><a href="#app">app</a> : <code>lib_app</code></dt>
 <dd></dd>
-<dt><a href="#options">options</a> : <code>type.constructor_options</code></dt>
+<dt><a href="#constructor_options">constructor_options</a> : <code>type.constructor_options</code></dt>
 <dd></dd>
 </dl>
 
@@ -60,13 +60,13 @@ server.start(error => {
 
 | Param | Type |
 | --- | --- |
-| [options] | [<code>options</code>](#options) | 
+| [options] | [<code>constructor\_options</code>](#constructor_options) | 
 
 <a name="app"></a>
 
 ## app : <code>lib\_app</code>
 **Kind**: global typedef  
-<a name="options"></a>
+<a name="constructor_options"></a>
 
-## options : <code>type.constructor\_options</code>
+## constructor\_options : <code>type.constructor\_options</code>
 **Kind**: global typedef  

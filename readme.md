@@ -51,6 +51,8 @@ server.start(error => {
 <dd></dd>
 <dt><a href="#constructor_options">constructor_options</a> : <code>type.constructor_options</code></dt>
 <dd></dd>
+<dt><a href="#request">request</a> : <code>type.request</code></dt>
+<dd></dd>
 </dl>
 
 <a name="create"></a>
@@ -69,4 +71,8 @@ server.start(error => {
 <a name="constructor_options"></a>
 
 ## constructor\_options : <code>type.constructor\_options</code>
+**Kind**: global typedef  
+<a name="request"></a>
+
+## request : <code>type.request</code>
 **Kind**: global typedef  

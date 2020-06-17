@@ -12,6 +12,9 @@ exports.get = get.get
 /**
  * @typedef {type.constructor_options} constructor_options
  */
+/**
+ * @typedef {type.request} request
+ */
 
 /**
  * @param {constructor_options} [options]

@@ -140,17 +140,17 @@ class App {
                     headers:  incomingMessageHttp.headers,
                     reply: function(status_code, data, callback) {
                         try {
-                            let data_string = ''
-                            if (typeof data === 'string') {
-                                data_string = data
+                            let data_send = undefined
+                            if (typeof data === 'string' || Buffer.isBuffer(data)) {
+                                data_send = data
                             } else if (typeof data === 'object') {
-                                data_string = JSON.stringify(data)
+                                data_send = JSON.stringify(data)
                             } else {
-                                data_string = vvs.toString(data)
+                                data_send = vvs.toString(data)
                             }
 
                             serverResponseHttp.statusCode = vvs.toInt(status_code, 200)
-                            serverResponseHttp.end(data_string, () => {
+                            serverResponseHttp.end(data_send, () => {
                                 incomingMessageHttp = undefined
                                 if (vvs.isFunction(callback)) {
                                     callback(undefined)

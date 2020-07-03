@@ -40,7 +40,7 @@ exports.stub = stub
  * @typedef request
  * @property {request_method} method
  * @property {string} url
- * @property {string} data
+ * @property {string|Buffer} data
  * @property {Object} headers
  * @property {function_reply} reply
  * @property {function} reply_set_header

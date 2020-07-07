@@ -49,7 +49,7 @@ exports.stub = stub
 /**
  * @callback function_reply
  * @param {number} status_code
- * @param {string|Buffer} data
+ * @param {string|Buffer|Object} data
  * @param {callback_error} [callback]
  */
 

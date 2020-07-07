@@ -15,6 +15,9 @@ exports.get = get.get
 /**
  * @typedef {type.request} request
  */
+/**
+ * @typedef {type.function_reply} function_reply
+ */
 
 /**
  * @param {constructor_options} [options]

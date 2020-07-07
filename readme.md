@@ -53,6 +53,8 @@ server.start(error => {
 <dd></dd>
 <dt><a href="#request">request</a> : <code>type.request</code></dt>
 <dd></dd>
+<dt><a href="#function_reply">function_reply</a> : <code>type.function_reply</code></dt>
+<dd></dd>
 </dl>
 
 <a name="create"></a>
@@ -75,4 +77,8 @@ server.start(error => {
 <a name="request"></a>
 
 ## request : <code>type.request</code>
+**Kind**: global typedef  
+<a name="function_reply"></a>
+
+## function\_reply : <code>type.function\_reply</code>
 **Kind**: global typedef  

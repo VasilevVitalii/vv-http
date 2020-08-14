@@ -53,6 +53,8 @@ server.start(error => {
 <dd></dd>
 <dt><a href="#request">request</a> : <code>type.request</code></dt>
 <dd></dd>
+<dt><a href="#request_method">request_method</a> : <code>type.request_method</code></dt>
+<dd></dd>
 <dt><a href="#function_reply">function_reply</a> : <code>type.function_reply</code></dt>
 <dd></dd>
 </dl>
@@ -77,6 +79,10 @@ server.start(error => {
 <a name="request"></a>
 
 ## request : <code>type.request</code>
+**Kind**: global typedef  
+<a name="request_method"></a>
+
+## request\_method : <code>type.request\_method</code>
 **Kind**: global typedef  
 <a name="function_reply"></a>
 

@@ -16,6 +16,9 @@ exports.get = get.get
  * @typedef {type.request} request
  */
 /**
+ * @typedef {type.request_method} request_method
+ */
+/**
  * @typedef {type.function_reply} function_reply
  */
 

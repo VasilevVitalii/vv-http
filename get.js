@@ -56,6 +56,7 @@ function get_requester(url) {
  * @param {Error} error
  * @param {Buffer} buffer
  * @param {string} url
+ * @param {string} file_name
  */
 /**
  * @param {string} url
@@ -66,28 +67,39 @@ function get(url, options, callback) {
     let save_as_full_file_name = (vvs.isEmpty(options) ? undefined : vvs.toString(options.save_as_full_file_name))
     let add_to_full_file_name_original = (vvs.isEmpty(options) ? false : vvs.toBool(options.add_to_full_file_name_original, false))
 
-    if (!vvs.isEmptyString(save_as_full_file_name) && add_to_full_file_name_original === true) {
-        save_as_full_file_name = path.join(save_as_full_file_name, path.basename(url))
-    }
-
     let callbacked = {send: false}
 
     let requester = get_requester(url)
     if (!vvs.isEmpty(requester.error)) {
-        callback(requester.error, undefined, url)
+        callback(requester.error, undefined, url, undefined)
         return
     }
 
     try {
         requester.protocol.get(url, requester.options, result => {
             let statusCode = vvs.toInt(vvs.findPropertyValueInObject(result, 'statusCode'), 200)
+            let file_name = path.basename(url)
+
+            let content_disposition = vvs.findPropertyValueInObject(result.headers, 'content-disposition', '')
+            if (!vvs.isEmptyString(content_disposition)) {
+                let reg = new RegExp('^filename=', 'i')
+                let lexem = vvs.parser({end_of_command: ';'}).lexemify_tree(vvs.findPropertyValueInObject(result.headers, 'content-disposition', '')).filter(f => f.type === 'lexem' && reg.test(f.final))
+                if (lexem.length > 0) {
+                    file_name = lexem[0].final.substring(9, lexem[0].final.length)
+                    file_name = vvs.border_del(file_name, '"', '"')
+                    file_name = vvs.border_del(file_name, "'", "'")
+                }
+            }
+            if (!vvs.isEmptyString(save_as_full_file_name) && add_to_full_file_name_original === true) {
+                save_as_full_file_name = path.join(save_as_full_file_name, file_name)
+            }
 
             if (statusCode === 302) {
                 let next_url = vvs.toString(vvs.findPropertyValueInObject(result.headers, 'location'))
                 if (vvs.isEmptyString(next_url)) {
                     if (!callbacked.send) {
                         callbacked.send = true
-                        callback(new Error(vvs.format('request return statusCode {0}', statusCode)), undefined, url)
+                        callback(new Error(vvs.format('request return statusCode {0}', statusCode)), undefined, url, file_name)
                     }
                     return
                 }
@@ -101,7 +113,7 @@ function get(url, options, callback) {
             if (statusCode !== 200) {
                 if (!callbacked.send) {
                     callbacked.send = true
-                    callback(new Error(vvs.format('request return statusCode {0}', statusCode)), undefined, url)
+                    callback(new Error(vvs.format('request return statusCode {0}', statusCode)), undefined, url, file_name)
                 }
                 return
             }
@@ -115,7 +127,7 @@ function get(url, options, callback) {
                     write_stream = undefined
                     if (!callbacked.send) {
                         callbacked.send = true
-                        callback(error, undefined, url)
+                        callback(error, undefined, url, file_name)
                     }
                 })
                 write_stream.on('finish', () => {
@@ -124,7 +136,7 @@ function get(url, options, callback) {
                     write_stream = undefined
                     if (!callbacked.send) {
                         callbacked.send = true
-                        callback(undefined, undefined, url)
+                        callback(undefined, undefined, url, file_name)
                     }
                 })
             }
@@ -143,7 +155,7 @@ function get(url, options, callback) {
                 catch (error) {
                     if (!callbacked.send) {
                         callbacked.send = true
-                        callback(error, undefined, url)
+                        callback(error, undefined, url, file_name)
                     }
                 }
             }).on('end', () => {
@@ -155,25 +167,25 @@ function get(url, options, callback) {
                 else {
                     if (!callbacked.send) {
                         callbacked.send = true
-                        callback(undefined, Buffer.concat(body), url)
+                        callback(undefined, Buffer.concat(body), url, file_name)
                     }
                 }
             }).on('error', (error) => {
                 if (!callbacked.send) {
                     callbacked.send = true
-                    callback(error, undefined, url)
+                    callback(error, undefined, url, file_name)
                 }
             })
         }).on('error', (error) => {
             if (!callbacked.send) {
                 callbacked.send = true
-                callback(error, undefined, url)
+                callback(error, undefined, url, undefined)
             }
         })
     } catch (error) {
         if (!callbacked.send) {
             callbacked.send = true
-            callback(error, undefined, url)
+            callback(error, undefined, url, undefined)
         }
     }
 }

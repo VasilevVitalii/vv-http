@@ -8,7 +8,6 @@ const fs = require('fs')
 const partial = require('./app.partial.js')
 
 exports.get = get
-exports.get_file = get_file
 
 /**
  * @typedef type_requester
@@ -26,7 +25,7 @@ function get_requester(url) {
     let res = {
         error: undefined,
         options: undefined,
-        protocol: undefined
+        protocol: undefined,
     }
 
     try {
@@ -49,12 +48,14 @@ function get_requester(url) {
 
 /**
  * @typedef type_get_data
- * @property {string} save_as_full_file_name
+ * @property {string} [save_as_full_file_name]
+ * @property {boolean} [add_to_full_file_name_original]
  */
 /**
  * @callback callback_get_data
  * @param {Error} error
  * @param {Buffer} buffer
+ * @param {string} url
  */
 /**
  * @param {string} url
@@ -63,21 +64,44 @@ function get_requester(url) {
  */
 function get(url, options, callback) {
     let save_as_full_file_name = (vvs.isEmpty(options) ? undefined : vvs.toString(options.save_as_full_file_name))
+    let add_to_full_file_name_original = (vvs.isEmpty(options) ? false : vvs.toBool(options.add_to_full_file_name_original, false))
+
+    if (!vvs.isEmptyString(save_as_full_file_name) && add_to_full_file_name_original === true) {
+        save_as_full_file_name = path.join(save_as_full_file_name, path.basename(url))
+    }
+
     let callbacked = {send: false}
 
     let requester = get_requester(url)
     if (!vvs.isEmpty(requester.error)) {
-        callback(requester.error, undefined)
+        callback(requester.error, undefined, url)
         return
     }
 
     try {
         requester.protocol.get(url, requester.options, result => {
             let statusCode = vvs.toInt(vvs.findPropertyValueInObject(result, 'statusCode'), 200)
+
+            if (statusCode === 302) {
+                let next_url = vvs.toString(vvs.findPropertyValueInObject(result.headers, 'location'))
+                if (vvs.isEmptyString(next_url)) {
+                    if (!callbacked.send) {
+                        callbacked.send = true
+                        callback(new Error(vvs.format('request return statusCode {0}', statusCode)), undefined, url)
+                    }
+                    return
+                }
+                if (!callbacked.send) {
+                    callbacked.send = true
+                    get(next_url, options, callback)
+                }
+                return
+            }
+
             if (statusCode !== 200) {
                 if (!callbacked.send) {
                     callbacked.send = true
-                    callback(new Error(vvs.format('request return statusCode {0}', statusCode)), undefined)
+                    callback(new Error(vvs.format('request return statusCode {0}', statusCode)), undefined, url)
                 }
                 return
             }
@@ -91,7 +115,7 @@ function get(url, options, callback) {
                     write_stream = undefined
                     if (!callbacked.send) {
                         callbacked.send = true
-                        callback(error, undefined)
+                        callback(error, undefined, url)
                     }
                 })
                 write_stream.on('finish', () => {
@@ -100,7 +124,7 @@ function get(url, options, callback) {
                     write_stream = undefined
                     if (!callbacked.send) {
                         callbacked.send = true
-                        callback(undefined, undefined)
+                        callback(undefined, undefined, url)
                     }
                 })
             }
@@ -119,7 +143,7 @@ function get(url, options, callback) {
                 catch (error) {
                     if (!callbacked.send) {
                         callbacked.send = true
-                        callback(error, undefined)
+                        callback(error, undefined, url)
                     }
                 }
             }).on('end', () => {
@@ -131,115 +155,25 @@ function get(url, options, callback) {
                 else {
                     if (!callbacked.send) {
                         callbacked.send = true
-                        callback(undefined, Buffer.concat(body))
+                        callback(undefined, Buffer.concat(body), url)
                     }
                 }
             }).on('error', (error) => {
                 if (!callbacked.send) {
                     callbacked.send = true
-                    callback(error, undefined)
+                    callback(error, undefined, url)
                 }
             })
         }).on('error', (error) => {
             if (!callbacked.send) {
                 callbacked.send = true
-                callback(error, undefined)
+                callback(error, undefined, url)
             }
         })
     } catch (error) {
         if (!callbacked.send) {
             callbacked.send = true
-            callback(error, undefined)
+            callback(error, undefined, url)
         }
     }
-}
-
-/**
- * @typedef type_get_file
- * @property {string} save_as_file_path
- * @property {'ORIGINAL_FILE_NAME'|string} save_as_file_name
- */
-/**
- * @callback callback_get_file
- * @param {Error} error
- * @param {Buffer} buffer
- * @param {string} name
- */
-/**
- * @param {string} url
- * @param {type_get_file} options
- * @param {callback_get_file} callback
- */
-function get_file(url, options, callback) {
-    let callbacked = {send: false}
-
-    let requester = get_requester(url)
-    if (!vvs.isEmpty(requester.error)) {
-        if (!callbacked.send) {
-            callbacked.send = true
-            callback(requester.error, undefined, undefined)
-        }
-        return
-
-    }
-    try {
-        let file_name = undefined
-        requester.protocol.get(url, requester.options, result => {
-            let statusCode = vvs.toInt(vvs.findPropertyValueInObject(result, 'statusCode'), 302)
-            if (statusCode !== 302) {
-                if (!callbacked.send) {
-                    callbacked.send = true
-                    callback(new Error(vvs.format('request return statusCode {0}', statusCode)), undefined, undefined)
-                }
-                return
-            }
-            let url_with_file_name = vvs.toString(vvs.findPropertyValueInObject(result.headers, 'location'))
-            if (vvs.isEmptyString(url_with_file_name)) {
-                if (!callbacked.send) {
-                    callbacked.send = true
-                    callback(new Error('cant find file location in headers'), undefined, undefined)
-                }
-                return
-            }
-            file_name = path.basename(url_with_file_name)
-            if (vvs.isEmptyString(file_name)) {
-                if (!callbacked.send) {
-                    callbacked.send = true
-                    callback(new Error(vvs.format('cant get file name from file location {0}', url_with_file_name)), undefined, undefined)
-                }
-                return
-            }
-
-            /** @type {type_get_data} */
-            let get_options = undefined
-            if (!vvs.isEmpty(options) && !vvs.isEmptyString(options.save_as_file_name) && !vvs.isEmptyString(options.save_as_file_path)) {
-                get_options = {
-                    save_as_full_file_name : path.join(
-                        options.save_as_file_path,
-                        options.save_as_file_name === 'ORIGINAL_FILE_NAME' ? file_name : options.save_as_file_name
-                        )
-                }
-            }
-
-            get(url_with_file_name, get_options, (error, buffer) => {
-                if (!vvs.isEmpty(error)) {
-                    if (!callbacked.send) {
-                        callbacked.send = true
-                        callback(error, undefined, undefined)
-                    }
-                    return
-                }
-                if (!callbacked.send) {
-                    callbacked.send = true
-                    callback(undefined, buffer, file_name)
-                }
-            })
-        })
-    } catch (error) {
-        if (!callbacked.send) {
-            callbacked.send = true
-            callback(error, undefined, undefined)
-        }
-    }
-
 }

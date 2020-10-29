@@ -5,7 +5,7 @@ const get = require('./get.js')
 
 exports.create = create
 exports.get = get.get
-exports.get_file = get.get_file
+//exports.get_file = get.get_file
 
 /**
  * @typedef {lib_app} app

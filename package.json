@@ -1,13 +1,13 @@
 {
   "name": "vv-http",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "description": "",
   "main": "index.js",
   "scripts": {
     "doc": "type .readme.md > readme.md && jsdoc2md index.js >> readme.md",
     "updatever": "npm version patch --no-git-tag-version",
-    "gitadd": "git add ./package.json ./package-lock.json ./dist/*",
-    "build": "npx tsc"
+    "gitadd": "git add ./package.json ./package-lock.json",
+    "build": "del *.d.ts && npx tsc"
   },
   "pre-commit": "build, doc, updatever, gitadd",
   "repository": {

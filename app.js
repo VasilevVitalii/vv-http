@@ -101,6 +101,19 @@ class App {
         })
 
         server.on('request', (incomingMessageHttp, serverResponseHttp) => {
+            /** @type {type.request_method} */
+            // @ts-ignore
+            let incoming_method = vvs.toString(incomingMessageHttp.method, '').toUpperCase()
+            if (incoming_method === 'OPTIONS') {
+                const headers = {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'origin, content-type, accept',
+                }
+                serverResponseHttp.writeHead(204, headers)
+                serverResponseHttp.end()
+                return
+            }
+
             if (!vvs.isEmpty(incomingMessageHttp.headers) && !vvs.isEmpty(incomingMessageHttp.headers.origin)) {
                 serverResponseHttp.setHeader('Access-Control-Allow-Origin', incomingMessageHttp.headers.origin)
             } else {
@@ -118,9 +131,9 @@ class App {
                 incomingMessageHttp.removeAllListeners('data')
                 incomingMessageHttp.removeAllListeners('end')
 
-                /** @type {type.request_method} */
-                // @ts-ignore
-                let incoming_method = vvs.toString(incomingMessageHttp.method, '').toUpperCase()
+                // /** @type {type.request_method} */
+                // // @ts-ignore
+                // let incoming_method = vvs.toString(incomingMessageHttp.method, '').toUpperCase()
                 let incoming_url = vvs.toString(incomingMessageHttp.url, '/')
 
                 if (!vvs.isEmptyString(this._env.url.path)) {
